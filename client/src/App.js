@@ -14,7 +14,7 @@ class App extends React.Component {
   }
 
   callApi() {
-    fetch('http://localhost:3001/test')
+    fetch('http://localhost:3001/api')
       .then(res => res.text())
       .then(res => this.setState({apiResponse: res}))
       .catch(err => err)

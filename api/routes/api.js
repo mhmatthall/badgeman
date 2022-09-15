@@ -9,7 +9,7 @@ const subnetFirstPoolAddress = subnetPrefix + subnetFirstPoolAddressSuffix
 const subnetLastPoolAddress = subnetPrefix + subnetLastPoolAddressSuffix
 
 
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
     find(
         {
             address: subnetFirstPoolAddress + '-' + subnetLastPoolAddress
