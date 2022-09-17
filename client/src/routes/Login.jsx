@@ -1,5 +1,5 @@
 import React from 'react'
-import './Login.scss'
+import './login.scss'
 
 class Login extends React.Component {
   render() {
