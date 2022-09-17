@@ -1,9 +1,13 @@
 {
+  "name": "badgeman",
+  "description": "The digital name badge management server for the Festival of Ideas 2022",
+  "author": "Matt Hall <matt@matthall.io> (http://matthall.io)",
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": "github:mhmatthall/badgeman",
+  "private": true,
   "dependencies": {
-    "cors": "^2.8.5",
-    "image_to_epaper_converter": "^1.0.2",
-    "local-devices": "^4.0.0",
-    "mongoose": "^6.6.1"
+    "image_to_epaper_converter": "^1.0.2"
   },
   "scripts": {
     "start-all": "start npm --prefix ./api run start & start npm --prefix ./client run start"
