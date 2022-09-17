@@ -1,5 +1,6 @@
 var createError = require('http-errors');
 var express = require('express');
+var mongoose = require('mongoose');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -10,6 +11,30 @@ var usersRouter = require('./routes/users');
 var apiRouter = require('./routes/api');
 
 var app = express();
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+var dbUrl = 'mongodb://127.0.0.1:27017/badgeman';
+
+// Init mongoDB
+mongoose.connect(
+  dbUrl,
+  // to fix deprecation warnings
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }
+);
+
+const db = mongoose.connection;
+
+db.on(
+  'error',
+  console.error.bind(
+    console,
+    'mongoDB connection error:'
+  )
+)
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

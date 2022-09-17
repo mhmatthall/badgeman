@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "cors": "^2.8.5",
-    "local-devices": "^4.0.0"
+    "image_to_epaper_converter": "^1.0.2",
+    "local-devices": "^4.0.0",
+    "mongoose": "^6.6.1"
   },
   "scripts": {
     "start-all": "start npm --prefix ./api run start & start npm --prefix ./client run start"
