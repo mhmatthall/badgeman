@@ -1,15 +1,15 @@
 # badgeman
-The digital name badge management server for the Festival of Ideas 2022
+The digital name badge management server for the Festival of Ideas 2022.
 
 ## Architecture
-This version of the app is designed to be run entirely locally on a private subnet. It incorporates a web server for the front-end badge editor web app and a REST API server for data access for the UI/badges.
+This version of the app is designed to be run entirely locally on a private subnet. It incorporates a web server for the front-end badge editor web app and a REST back-end API server for data access for the UI/badges.
 
-Here's a diagram (click open Miro):
+Here's a diagram (click to open Miro):
 [![Digibadge_architecture170922](https://user-images.githubusercontent.com/42594962/190867248-da39a1ed-51c1-450b-aa64-2f69235e85e9.jpg)](https://miro.com/app/board/uXjVPdtm_zU=/?share_link_id=651121183805)
 
 ## Requirements
-- a local MongoDB server
-- a DHCP server on the subnet
+- a local [MongoDB server](https://www.mongodb.com/docs/manual/installation/)
+- a DHCP server on the subnet (I'm using [dhcpsrv](https://www.dhcpserver.de/cms/) on Windows 10)
 - a meaty wireless access point
 
 ## Repo structure
@@ -17,6 +17,7 @@ Here's a diagram (click open Miro):
 .
 └── .gitignore
 └── README.md
+└── LICENSE
 └── package-lock.json
 └── package.json
 └── api
