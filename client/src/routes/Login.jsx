@@ -1,17 +1,15 @@
 import React from "react";
 import md5 from "md5";
-// import { Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import "./login.scss";
 
-class Login extends React.Component {
-  render() {
-    return (
-      <div className="Login">
-        <Header />
-        <LoginForm />
-      </div>
-    );
-  }
+function Login() {
+  return (
+    <div className="Login">
+      <Header />
+      <LoginForm />
+    </div>
+  );
 }
 
 function Header() {
@@ -27,6 +25,7 @@ class LoginForm extends React.Component {
       id: "",
       secret: "",
       badgeExists: null,
+      shouldRedirect: false,
     };
 
     // Bind this to functions
@@ -36,6 +35,7 @@ class LoginForm extends React.Component {
   }
 
   handleChange(event) {
+    // Update state to match form entry
     this.setState({ [event.target.name]: event.target.value });
   }
 
@@ -43,13 +43,8 @@ class LoginForm extends React.Component {
     // Stop browser auto nav
     event.preventDefault();
 
-    if (md5(this.state.id).substring(0, 5) !== this.state.secret) {
-      alert(
-        "Hash check failed! — " +
-          md5(this.state.id).substring(0, 5) +
-          " != " +
-          this.state.secret
-      );
+    if (!verifySecret(this.state.id, this.state.secret)) {
+      alert("That's not the right secret. Try again!");
     } else {
       this.fetchBadge();
     }
@@ -58,9 +53,7 @@ class LoginForm extends React.Component {
   fetchBadge(event) {
     fetch(`http://localhost:3001/api/badges/id2mac/${this.state.id}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     })
       .then((res) => this.setState({ badgeExists: res.ok }))
       .catch((err) => err);
@@ -68,10 +61,13 @@ class LoginForm extends React.Component {
 
   componentDidUpdate() {
     if (this.state.badgeExists !== null) {
+      // If we've queried the API
       if (this.state.badgeExists) {
-        alert("IT EXISTS!");
+        // If badge exists in DB, then move on
+        this.setState({ shouldRedirect: true });
       } else {
-        alert("IT DOES NOT EXIST");
+        // Badge does not exist; reset state
+        alert("That badge hasn't been registered yet. Try again!");
         this.setState({ badgeExists: null });
       }
     }
@@ -79,33 +75,49 @@ class LoginForm extends React.Component {
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          Badge ID:
-          <input
-            name="id"
-            type="text"
-            required
-            pattern="[0-9]+"
-            value={this.state.id}
-            onChange={this.handleChange}
-          />
-        </label>
-        <label>
-          Secret code:
-          <input
-            name="secret"
-            type="text"
-            required
-            pattern="[0-9a-f]+"
-            value={this.state.secret}
-            onChange={this.handleChange}
-          />
-        </label>
-        <input type="submit" value="Go!" />
-      </form>
+      <div>
+        <form onSubmit={this.handleSubmit}>
+          <label>
+            Badge ID:
+            <input
+              name="id"
+              type="text"
+              required
+              pattern="[0-9]+"
+              value={this.state.id}
+              onChange={this.handleChange}
+            />
+          </label>
+          <label>
+            Secret code:
+            <input
+              name="secret"
+              type="text"
+              required
+              pattern="[0-9a-f]+"
+              value={this.state.secret}
+              onChange={this.handleChange}
+            />
+          </label>
+          <input type="submit" value="Go!" />
+        </form>
+        {
+          /* If we're ready to move on, navigate to the editor */
+          this.state.shouldRedirect && (
+            <Navigate
+              to="/editor"
+              replace={true}
+              state={{ id: this.state.id, secret: this.state.secret }}
+            />
+          )
+        }
+      </div>
     );
   }
 }
+
+export const verifySecret = (id, secret) => {
+  return md5(id).substring(0, 5) === secret;
+};
 
 export default Login;
