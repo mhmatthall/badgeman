@@ -1,100 +1,109 @@
-import React from 'react'
-import './login.scss'
+import React from "react";
+import md5 from "md5";
+// import { Navigate } from "react-router-dom";
+import "./login.scss";
 
 class Login extends React.Component {
   render() {
     return (
       <div className="Login">
-        {/* <ApiTest /> */}
         <Header />
         <LoginForm />
       </div>
-    )
+    );
   }
 }
 
 function Header() {
-  return (
-    <p>Festival of Ideas 2022</p>
-  )
+  return <p>Festival of Ideas 2022</p>;
 }
 
 class LoginForm extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
 
     // Init state
     this.state = {
-      id: '',
-      secret: ''
-    }
+      id: "",
+      secret: "",
+      badgeExists: null,
+    };
 
-    // Bind functions
-    this.handleChange = this.handleChange.bind(this)
-    this.handleSubmit = this.handleSubmit.bind(this)
+    // Bind this to functions
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.fetchBadge = this.fetchBadge.bind(this);
   }
 
   handleChange(event) {
-    this.setState(
-      { [event.target.name]: event.target.value }
-    )
+    this.setState({ [event.target.name]: event.target.value });
   }
-  
+
   handleSubmit(event) {
-    event.preventDefault()
-    this.props.history.push('/editor')
-    // alert('Badge ID: ' + this.state.id + ', Secret: ' + this.state.secret)
+    // Stop browser auto nav
+    event.preventDefault();
+
+    if (md5(this.state.id).substring(0, 5) !== this.state.secret) {
+      alert(
+        "Hash check failed! — " +
+          md5(this.state.id).substring(0, 5) +
+          " != " +
+          this.state.secret
+      );
+    } else {
+      this.fetchBadge();
+    }
   }
-  
+
+  fetchBadge(event) {
+    fetch(`http://localhost:3001/api/badges/id2mac/${this.state.id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => this.setState({ badgeExists: res.ok }))
+      .catch((err) => err);
+  }
+
+  componentDidUpdate() {
+    if (this.state.badgeExists !== null) {
+      if (this.state.badgeExists) {
+        alert("IT EXISTS!");
+      } else {
+        alert("IT DOES NOT EXIST");
+        this.setState({ badgeExists: null });
+      }
+    }
+  }
+
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
         <label>
           Badge ID:
           <input
-          name="id"
-          type="text"
-          value={this.state.id}
-          onChange={this.handleChange} />
+            name="id"
+            type="text"
+            required
+            pattern="[0-9]+"
+            value={this.state.id}
+            onChange={this.handleChange}
+          />
         </label>
         <label>
           Secret code:
           <input
-          name="secret"
-          type="text"
-          value={this.state.secret}
-          onChange={this.handleChange} />
+            name="secret"
+            type="text"
+            required
+            pattern="[0-9a-f]+"
+            value={this.state.secret}
+            onChange={this.handleChange}
+          />
         </label>
         <input type="submit" value="Go!" />
       </form>
-    )
-  }
-}
-
-class ApiTest extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      apiResponse: 'loading...'
-    }
-  }
-
-  componentDidMount() {
-    this.callApi()
-  }
-
-  callApi() {
-    fetch('http://localhost:3001/api/network/badges')
-      .then(res => res.text())
-      .then(res => this.setState({apiResponse: res}))
-      .catch(err => err)
-  }
-
-  render() {
-    return (
-      <div>
-        <p>server says: {this.state.apiResponse}</p>
-      </div>
     );
   }
 }
