@@ -6,6 +6,9 @@ const { json } = require('express')
 const express = require('express')
 const router = express.Router()
 const findDevices = require('local-devices')
+const { createCanvas, loadImage } = require("canvas");
+const converter = require('image_to_epaper_converter');
+const md5 = require('md5');
 
 // Import models
 const Badge = require('../models/Badge')

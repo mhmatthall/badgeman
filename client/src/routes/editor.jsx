@@ -1,14 +1,10 @@
 import React from "react";
-// import canvas from "canvas";
-import converter from "image_to_epaper_converter";
 import { useLocation } from "react-router-dom";
 import { verifySecret } from "./login";
 import { SERVER_URL } from "..";
 import "../css/index.scss";
 
-import bgImg from '../img/foi_badge_bg.jpg';
-
-const { createCanvas, loadImage } = require("canvas");
+// const { createCanvas, loadImage } = require("canvas");
 
 let cosmosRegular = new FontFace('Cosmos', "/src/fonts/Cosmos-Medium.woff")
 let cosmosLight = new FontFace('Cosmos Light', "/Cosmos-Light.woff'")

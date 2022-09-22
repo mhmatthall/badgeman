@@ -18,6 +18,9 @@
     "morgan": "~1.9.1",
     "cors": "^2.8.5",
     "local-devices": "^4.0.0",
-    "mongoose": "^6.6.1"
+    "mongoose": "^6.6.1",
+    "canvas": "^2.10.1",
+    "image_to_epaper_converter": "^1.0.2",
+    "md5": "^2.3.0"
   }
 }
