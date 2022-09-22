@@ -1,7 +1,8 @@
 import React from "react";
 import md5 from "md5";
 import { Navigate } from "react-router-dom";
-import "./login.scss";
+import { SERVER_URL } from "..";
+import "../css/index.scss";
 
 function Login() {
   return (
@@ -51,7 +52,7 @@ class LoginForm extends React.Component {
   }
 
   fetchBadge(event) {
-    fetch(`http://localhost:3001/api/badges/id2mac/${this.state.id}`, {
+    fetch(`http://${SERVER_URL}:3001/api/badges/id2mac/${this.state.id}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })

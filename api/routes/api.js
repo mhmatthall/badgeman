@@ -11,8 +11,8 @@ const findDevices = require('local-devices')
 const Badge = require('../models/Badge')
 
 // Create reusable IP refs
-const subnetPrefix = '192.168.0.'
-const subnetFirstPoolAddressSuffix = '3'
+const subnetPrefix = '192.168.1.'
+const subnetFirstPoolAddressSuffix = '5'
 const subnetLastPoolAddressSuffix = '254'
 const subnetFirstPoolAddress = subnetPrefix + subnetFirstPoolAddressSuffix
 const subnetLastPoolAddress = subnetPrefix + subnetLastPoolAddressSuffix

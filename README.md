@@ -11,6 +11,24 @@ Here's a diagram (click to open Miro):
 - a local [MongoDB server](https://www.mongodb.com/docs/manual/installation/)
 - a DHCP server on the subnet (I'm using [dhcpsrv](https://www.dhcpserver.de/cms/) on Windows 10)
 - a meaty wireless access point
+- once installed, a modification to `./client/node_modules/react-scripts/config/webpack.config.js` at the `resolve` tag to fix node polyfill issues:
+  ```
+    resolve: {
+      fallback: {
+        "fs": false,
+        "tls": false,
+        "net": false,
+        "http": require.resolve("stream-http"),
+        "https": false,
+        "zlib": require.resolve("browserify-zlib") ,
+        "path": require.resolve("path-browserify"),
+        "stream": require.resolve("stream-browserify"),
+        "util": require.resolve("util/"),
+        "assert": require.resolve("assert/"),
+        "buffer": require.resolve("buffer/"),
+        "crypto": require.resolve("crypto-browserify")
+      },
+  ```
 
 ## Repo structure
 ```
