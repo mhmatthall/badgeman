@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
@@ -19,8 +20,6 @@
     "cors": "^2.8.5",
     "local-devices": "^4.0.0",
     "mongoose": "^6.6.1",
-    "canvas": "^2.10.1",
-    "image_to_epaper_converter": "^1.0.2",
-    "md5": "^2.3.0"
+    "morgan": "~1.9.1"
   }
 }

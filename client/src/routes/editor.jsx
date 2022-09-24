@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { verifySecret } from "./login";
-import { SERVER_URL } from "..";
+import { config } from "..";
 import "../css/index.scss";
 
 // const { createCanvas, loadImage } = require("canvas");
@@ -63,13 +63,13 @@ class EditorForm extends React.Component {
   }
   
   fetchBadge(id) {
-    fetch(`http://${SERVER_URL}:3001/api/badges/id2mac/${id}`, {
+    fetch(`http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/api/badges/id2mac/${id}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
       .then((res) => res.json())
       .then((res) => {
-        fetch(`http://${SERVER_URL}:3001/api/badges/${res.macAddress}`, {
+        fetch(`http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/api/badges/${res.macAddress}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         })
@@ -95,13 +95,13 @@ class EditorForm extends React.Component {
       image: this.state.image,
     }
 
-    fetch(`http://${SERVER_URL}:3001/api/badges/id2mac/${id}`, {
+    fetch(`http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/api/badges/id2mac/${id}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
       .then((res) => res.json())
       .then((res) => {
-        return fetch(`http://${SERVER_URL}:3001/api/badges/${res.macAddress}`, {
+        return fetch(`http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/api/badges/${res.macAddress}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newDetails),

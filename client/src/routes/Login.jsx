@@ -1,7 +1,7 @@
 import React from "react";
 import md5 from "md5";
 import { Navigate } from "react-router-dom";
-import { SERVER_URL } from "..";
+import { config } from "..";
 import "../css/index.scss";
 
 function Login() {
@@ -14,7 +14,7 @@ function Login() {
 }
 
 function Header() {
-  return <p>Festival of Ideas 2022</p>;
+  return <p>{config.customisation.EVENT_NAME}</p>;
 }
 
 class LoginForm extends React.Component {
@@ -52,10 +52,13 @@ class LoginForm extends React.Component {
   }
 
   fetchBadge(event) {
-    fetch(`http://${SERVER_URL}:3001/api/badges/id2mac/${this.state.id}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    })
+    fetch(
+      `http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/api/badges/id2mac/${this.state.id}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    )
       .then((res) => this.setState({ badgeExists: res.ok }))
       .catch((err) => err);
   }
