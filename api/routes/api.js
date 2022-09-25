@@ -1,15 +1,15 @@
 /*
-    Badge manager REST API for the Festival of Ideas 2022
+    badgeman REST API
     by Matt Hall
 */
-// const { json } = require('express')
+const { createCanvas, loadImage, Image } = require("canvas");
 const express = require("express");
-const router = express.Router();
-const findDevices = require("local-devices");
-const { createCanvas, loadImage } = require("canvas");
-const md5 = require("md5");
 const fs = require("fs");
 const ini = require("ini");
+const findDevices = require("local-devices");
+const md5 = require("md5");
+const qr = require("qrcode");
+const router = express.Router();
 
 // Import INI file from project root
 const config = ini.parse(
@@ -31,10 +31,10 @@ async function updateBadge(macAddress) {
     return null;
   } else {
     // Consider no name in userData as indicating a blank badge
-    const isBadgeBlank = b.userData.name == "";
+    const isBadgeBlank = b.userData.name === "";
 
     // Handoff to appropriate render function
-    isBadgeBlank ? renderBlankBadge(b) : renderFullBadge(b);
+    isBadgeBlank ? await renderBlankBadge(b) : await renderFullBadge(b);
   }
 }
 
@@ -48,47 +48,51 @@ async function renderBlankBadge(badge) {
 
   // Grab base blank badge template image
   const baseImg = await loadImage(
-    `http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/images/foi_badge_instructions.png`
+    `http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/images/badge_template_blank.png`
   );
+
+  // Generate QR code dataUrl (default size is 132x132px -- 100x100px QR with 16px border)
+  const qrCode = await qr.toDataURL(
+    `http://${config.HOST_IP_ADDRESS}:${config.CLIENT_PORT}`
+  );
+
+  // Load as image
+  const qrCodeImg = await loadImage(qrCode);
 
   // ADD BADGE CONTENT
   // Draw base image on canvas
   ctx.drawImage(baseImg, 0, 0, 296, 128);
 
+  // ctx.drawImage(qrCodeImg, 110, 45, 90, 90);
+  ctx.drawImage(qrCodeImg, 16, 16, 100, 100, 113, 51, 70, 70);
+
   // Set text style
   ctx.textAlign = "center";
   ctx.font = 'bold 16px "Fira Code"';
 
-  // I'm using few variables here to reduce the line count of this text draw. It gets pretty fugly otherwise.
+  // I'm using few variables here to reduce the line count of this text draw
   // Insert SSID text
   if (ctx.measureText(config.network.SSID).width > 55) {
     // If name is too long, split over two lines at first whitespace
     const ssidText = config.network.SSID.split(/ (.*)/s);
-    ctx.fillText(ssidText[0], 51, 89);
-    ctx.fillText(ssidText[1], 51, 105);
+    ctx.fillText(ssidText[0], 51, 94);
+    ctx.fillText(ssidText[1], 51, 112);
   } else {
     // Name fits on one line, don't change
-    ctx.fillText(config.network.SSID, 51, 89);
+    ctx.fillText(config.network.SSID, 51, 94);
   }
 
-  // Insert badge ID text
-  ctx.fillText(badge.currentId, 245, 79);
-
   // Insert badge secret text
-  ctx.fillText(secret, 245, 115);
+  ctx.fillText(secret, 245, 113);
 
-  // IMAGE PRE-PROCESSING FOR BADGE DISPLAY MODULE
-  // Rotate to portrait
-  ctx.rotate(90 * (Math.PI / 180));
+  ctx.font = 'bold 18px "Fira Code"';
 
-  // Get the canvas as a raw array of pixels
-  rawImg = ctx.getImageData(0, 0, cv.width, cv.height).data;
+  // Insert badge ID text
+  ctx.fillText(badge.currentId, 260, 69);
 
-  // Convert to bitstring for easy parsing by the badge
-  badge.userData.image = convertToBitstring(rawImg);
+  // Apply pre-processing for badge display
+  badge.userData.image = await preProcess(cv, ctx);
 
-  // Save image as dataUrl (base64)
-  // badge.userData.image = cv.toDataURL("image/png");
   await badge.save();
 }
 
@@ -99,7 +103,7 @@ async function renderFullBadge(badge) {
 
   // Grab base badge template image
   const baseImg = await loadImage(
-    `http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/images/foi_badge_bg.jpg`
+    `http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/images/badge_template_full.png`
   );
 
   // ADD BADGE CONTENT
@@ -110,63 +114,117 @@ async function renderFullBadge(badge) {
   ctx.font = '36px "Cosmos"';
 
   // Check width to make sure it hasn't spilt
-  if (ctx.measureText(badge.userData.name).width <= 190) {
+  if (ctx.measureText(badge.userData.name).width <= 192) {
     // Name fits on one line at 36px, draw
-    ctx.fillText(nameString, 10, 28);
+    ctx.fillText(badge.userData.name, 10, 36);
   } else {
     // Smaller name font size
     ctx.font = '24px "Cosmos"';
 
-    // Check width to make sure it hasn't spilt
-    if (ctx.measureText(badge.userData.name).width <= 190) {
+    // Check width to make sure it hasn't spilt onto profile image
+    if (ctx.measureText(badge.userData.name).width <= 192) {
       // Name fits on one line at 24px, draw
-      ctx.fillText(nameString, 10, 28);
+      ctx.fillText(badge.userData.name, 10, 28);
     } else {
       // If name is still too long, split over two lines at first whitespace
-      const nameArr = nameString.split(/ (.*)/s);
+      const nameArr = badge.userData.name.split(/ (.*)/s);
       ctx.fillText(nameArr[0], 10, 28);
       ctx.fillText(nameArr[1], 10, 54);
     }
   }
 
-  ctx.font = '16px "Cosmos"';
-  ctx.fillText(badge.userData.affiliation, 10, 95);
+  ctx.font = '17px "Cosmos Light"';
+  ctx.fillText(badge.userData.pronouns, 10, 76);
 
-  ctx.font = '16px "Cosmos Light"';
-  ctx.fillText(badge.userData.pronouns, 10, 75);
+  ctx.font = '17px "Cosmos"';
+  ctx.fillText(badge.userData.affiliation, 10, 96);
 
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(badge.userData.message, 10, 120);
+  ctx.textAlign = "center";
+  ctx.fillText(badge.userData.message, 148, 124);
 
-  // IMAGE PRE-PROCESSING FOR BADGE DISPLAY MODULE
-  // Rotate to portrait
-  ctx.rotate(90 * (Math.PI / 180));
+  // Apply pre-processing for badge display
+  badge.userData.image = await preProcess(cv, ctx);
 
-  // Get the canvas as a raw array of pixels
-  rawImg = ctx.getImageData(0, 0, cv.width, cv.height).data;
-
-  // Convert to bitstring for easy parsing by the badge
-  badge.userData.image = convertToBitstring(rawImg);
-
-  // Save image as dataUrl (base64)
-  // badge.userData.image = cv.toDataURL("image/png");
   await badge.save();
 }
 
-function convertToBitstring(rawImg) {
-  // rawImg is a 1D array of integers in the format R,G,B,A, where RGBA are in the range [0-256)
+async function preProcess(cv, ctx) {
+  // IMAGE PRE-PROCESSING FOR BADGE DISPLAY MODULE
+  //    Uses lots of the rotation code written by Gustavo Carvalho for SO:
+  //    https://stackoverflow.com/questions/16645801/
+
+  // Copy current image state to temp var
+  let originalImg = await loadImage(cv.toDataURL());
+
+  // Save original width/height
+  let cw = cv.width;
+  let ch = cv.height;
+
+  // Reset canvas layout to new dimensions
+  cv.width = ch;
+  cv.height = cw;
+  cw = cv.width;
+  ch = cv.height;
+  ctx.save();
+
+  // Translate and rotate canvas 90deg
+  ctx.translate(cw, ch / cw);
+  ctx.rotate(Math.PI / 2);
+
+  // Draw the original image, now rotated
+  ctx.drawImage(originalImg, 0, 0);
+  ctx.restore();
+
+  // Export the canvas as a raw array of pixels (RGBA)
+  const rawImg = ctx.getImageData(0, 0, cv.width, cv.height).data;
+
+  // Compress image as to not overwhelm badge memory
+  return compress(rawImg);
+}
+
+/**
+  Compress an image expressed as a raw array of RGBA values into a single hex string.
+
+  @param {Array} rawImg A 1D array of integers in the format `[R0,G0,B0,A0,R1,G1,B1,A1,...]` where
+  Rx, Gx, Bx, Ax are in the range `[0-256)`.
+  
+  @return {String} A string of hex chars of length `(rawImg / 16)`.
+    
+*/
+function compress(rawImg) {
+  // STEP 1: CONVERT TO BITSTRING WITH EFFECTIVE SIZE (WIDTH x HEIGHT) BYTES
   let pixels = [];
 
   // Take the average of the RGB colour values (ignoring A) and threshold to 0 or 1
   for (i = 0; i < rawImg.length; i = i + 4) {
-    let avgColour = (rawImg[i] + rawImg[i + 1] + rawImg[i + 2]) / 3
+    let avgColour = (rawImg[i] + rawImg[i + 1] + rawImg[i + 2]) / 3;
 
     // Avg colours <128 get assigned white, >128 black
     avgColour < 128 ? pixels.push(0) : pixels.push(1);
   }
 
-  // Cram it all into a single string
-  return (pixels.toString());
+  let pixelsBin = pixels.join("");
+  let pixelsHex = [];
+
+  // STEP 2: CONVERT TO HEX CSV LIST WITH EFFECTIVE SIZE (WIDTH x HEIGHT) / 8 BYTES
+  for (i = 0; i < pixelsBin.length; i = i + 8) {
+    // Read next 8 bits as a binary number, then convert to hex
+    let hex = parseInt(pixelsBin.substring(i, i + 8), (radix = 2)).toString(
+      (radix = 16)
+    );
+
+    // Prepend 0 if hex value < 0xf to ensure two char representation (e.g. '0e' instead of 'e')
+    if (hex.length == 1) {
+      hex = "0" + hex;
+    }
+
+    // Push to array
+    pixelsHex.push(hex);
+  }
+
+  // Condense hex array into a single string
+  return pixelsHex.join("");
 }
 
 // Get all data for all badges
@@ -290,14 +348,17 @@ router.put("/badges/by-id/:id", async (req, res) => {
       b.userData.affiliation = req.body.affiliation;
       b.userData.message = req.body.message;
 
-      // Render badge image with new data
-      await updateBadge(b.macAddress);
-
+      // Store mac before save
+      const macAddress = b.macAddress;
+      
       // Write to db and signal completion
-      await b.save().then(
+      await b.save().then(async () => {
+        // Render badge image with new data
+        await updateBadge(macAddress)
+
         // Okey doke
         res.status(200).end()
-      );
+      });
     }
   } catch (err) {
     // If request is malformed

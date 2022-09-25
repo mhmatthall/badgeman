@@ -20,6 +20,7 @@
     "local-devices": "^4.0.0",
     "md5": "^2.3.0",
     "mongoose": "^6.6.1",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "qrcode": "^1.5.1"
   }
 }
