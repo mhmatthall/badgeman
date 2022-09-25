@@ -1,5 +1,5 @@
 # badgeman
-The digital name badge management server for the Festival of Ideas 2022.
+A standalone digital name badge management server designed for use in large special events. Originally created for the Festival of Ideas 2022 at Swansea University.
 
 ## Architecture
 This version of the app is designed to be run entirely locally on a private subnet. It incorporates a web server for the front-end badge editor web app and a REST back-end API server for data access for the UI/badges.
@@ -9,7 +9,7 @@ Here's a diagram (click to open Miro):
 
 ## Requirements
 - a local [MongoDB server](https://www.mongodb.com/docs/manual/installation/)
-- a DHCP server on the subnet (I'm using [dhcpsrv](https://www.dhcpserver.de/cms/) on Windows 10)
+- a DHCP server on the subnet
 - a meaty wireless access point
 - once installed, a modification to `./client/node_modules/react-scripts/config/webpack.config.js` at the `resolve` tag to fix node polyfill issues, like this:
   ```
@@ -26,6 +26,7 @@ Here's a diagram (click to open Miro):
         "buffer": require.resolve("buffer/"),
       },
   ```
+- e-paper digital name badges with wireless LAN capability. I used Waveshare's Pico-ePaper-2.9 and Pico-ePaper-2.9-B, and you can find the drivers and code for using those [here](https://github.com/mhmatthall/badgeboy-picow).
 
 ## Repo structure
 ```
@@ -75,45 +76,55 @@ Here's a diagram (click to open Miro):
 ```
 
 ## API reference
-- `GET /badges` gets all data for all badges
-- `GET /badges/XXXXXXXXXXXX` gets all data for a registered badge, given a MAC address
-- `GET /badges/id2mac/X` gets the MAC address of a badge given its ID
-- `POST /badges` registers a new badge. Request format:
-  ```
-      {
-          "macAddress" : "XXXXXXXXXXXX",
-          "name":"X",
-          "pronouns":"X",
-          "affiliation":"X",
-          "message":"X",
-          "image":"X"
-      }
-  ```
+- `GET /badges`
+    
+    returns all badge data for all badges
+    
+- `GET /badges/by-id/X`
+    
+    returns all badge data for badge with ID `X`
+    
+- `GET /badges/by-mac/XXXXXXXXXXXX`
+    
+    returns all badge data for badge with MAC address `XXXXXXXXXXXX`
+    
+- `GET /network/devices`
+    
+    returns IP and MAC for all devices on the LAN
+    
+- `GET /network/badges`
+    
+    returns IP and MAC for badges on the LAN
+    
+- `POST /badges`
+    
+    creates a new (blank) badge entry on the database with given payload:
+    
+    ```jsx
+    {
+    	macAddress: "XXXXXXXXXXXX"
+    }
+    ```
+    
+- `PUT /badges/by-id/X`
+    
+    updates badge with ID `X` with given payload:
+    
+    ```jsx
+    {
+    	name: "",
+    	pronouns: "",
+    	affiliation: "",
+    	message: ""
+    }
+    ```
+## Future plans
+I intend to occasionally improve this and eventually turn it into an easy all-in-one solution for digital name badges for conferences.
 
-- `PUT /badges/XXXXXXXXXXXX` updates the data for a badge. Request format:
-  ```
-      {
-          "name":"X",
-          "pronouns":"X",
-          "affiliation":"X",
-          "message":"X",
-          "image":"X"
-      }
-  ```
-  
-- `GET /network` gets a list of all the devices on the network
-- `GET /network/badges` gets a list of all the badges on the network
-
-## Testing
-I really cba adding proper testing to this but here's some useful cURL requests for testing the API 😊:
-- Posting a new badge
-
-  `curl -d "@posttest.json" -X POST -H "Content-Type: application/json" http://localhost:3001/api/badges`
-
-- Updating a badge by MAC address
-
-  `curl -d "@puttest.json" -X PUT -H "Content-Type: application/json" http://localhost:3001/api/badges/XXXXXXXXXXXX`
-
-- Getting network devices
-
-  `curl -H 'Content-Type: application/json' http://localhost:3001/api/network`
+Ideas include:
+- Customisable badge graphic designs
+- Multiple badge display colours
+- Interactivity (games, quiz, etc.)
+- Live notifications
+- Internet connectivity
+- Automatic/easier user management
