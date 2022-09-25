@@ -53,7 +53,7 @@ class LoginForm extends React.Component {
 
   fetchBadge(event) {
     fetch(
-      `http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/api/badges/id2mac/${this.state.id}`,
+      `http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/api/badges/by-id/${this.state.id}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
