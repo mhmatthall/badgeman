@@ -13,6 +13,7 @@ import preval from "babel-plugin-preval/macro";
 
 // Import INI file from project root
 // Requires preval execution via Node because 'fs' disallowed on browser
+// THIS DOESN'T REFRESH ON REACT HOT RELOAD!
 const configLoader = preval`
   const fs = require("fs");
   const ini = require("ini");

@@ -11,6 +11,8 @@ Here's a diagram (click to open Miro):
 - a local [MongoDB server](https://www.mongodb.com/docs/manual/installation/)
 - a DHCP server on the subnet
 - a meaty wireless access point
+  - I'm using a UniFi Lite 6
+  - if you're running this in a private LAN, make sure to disable any upstream connection monitoring; UniFi APs have this enabled by default and it took me a week to figure out how to turn it off :(
 - once installed, a modification to `./client/node_modules/react-scripts/config/webpack.config.js` at the `resolve` tag to fix node polyfill issues, like this:
   ```
     resolve: {

@@ -2,7 +2,7 @@
     badgeman REST API
     by Matt Hall
 */
-const { createCanvas, loadImage, Image } = require("canvas");
+const { createCanvas, loadImage } = require("canvas");
 const express = require("express");
 const fs = require("fs");
 const ini = require("ini");
@@ -227,6 +227,17 @@ function compress(rawImg) {
   return pixelsHex.join("");
 }
 
+// Async-compatible filter helper function, equivalent to Array.filter()
+// by Gabe Rogan (https://stackoverflow.com/questions/33355528/)
+async function filter(arr, callback) {
+  const fail = Symbol();
+  return (
+    await Promise.all(
+      arr.map(async (item) => ((await callback(item)) ? item : fail))
+    )
+  ).filter((i) => i !== fail);
+}
+
 // Get all data for all badges
 router.get("/badges", async (req, res) => {
   try {
@@ -350,14 +361,14 @@ router.put("/badges/by-id/:id", async (req, res) => {
 
       // Store mac before save
       const macAddress = b.macAddress;
-      
+
       // Write to db and signal completion
       await b.save().then(async () => {
         // Render badge image with new data
-        await updateBadge(macAddress)
+        await updateBadge(macAddress);
 
         // Okey doke
-        res.status(200).end()
+        res.status(200).end();
       });
     }
   } catch (err) {
@@ -388,17 +399,6 @@ router.get("/network", (req, res) => {
       (err) => res.status(500).json({ error: err.toString() })
     );
 });
-
-// Async-compatible filter helper function, equivalent to Array.filter()
-// by Gabe Rogan (https://stackoverflow.com/questions/33355528/)
-async function filter(arr, callback) {
-  const fail = Symbol();
-  return (
-    await Promise.all(
-      arr.map(async (item) => ((await callback(item)) ? item : fail))
-    )
-  ).filter((i) => i !== fail);
-}
 
 // Get a list of the badges that are connected to the LAN
 //      Returns a JSON object in the format:

@@ -5,9 +5,6 @@ import { config } from "..";
 import "../css/index.scss";
 
 function Editor() {
-  // Push to history stack
-  
-
   // Get passed state from login page
   // eslint-disable-next-line no-unused-vars
   let [loginDetails, _] = React.useState(useLocation().state);
@@ -181,7 +178,11 @@ class EditorForm extends React.Component {
             disabled={this.state.isFormUnedited}
           />
         </form>
-        <img id="imagelol" alt="What your badge should look like" src={this.state.image} />
+        <img
+          id="imagelol"
+          alt="What your badge should look like"
+          src={this.state.image}
+        />
       </div>
     );
   }

@@ -14,7 +14,7 @@ function Login() {
 }
 
 function Header() {
-  return <p>{config.customisation.EVENT_NAME}</p>;
+  return <h1>{config.customisation.EVENT_NAME}</h1>;
 }
 
 class LoginForm extends React.Component {
@@ -32,49 +32,42 @@ class LoginForm extends React.Component {
     // Bind this to functions
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.fetchBadge = this.fetchBadge.bind(this);
+    this.doesBadgeExist = this.doesBadgeExist.bind(this);
+    // this.fetchBadge = this.fetchBadge.bind(this);
   }
 
   handleChange(event) {
     // Update state to match form entry
-    this.setState({ [event.target.name]: event.target.value });
+    this.setState({ [event.target.name]: event.target.value.toLowerCase() });
   }
 
-  handleSubmit(event) {
+  async handleSubmit(event) {
     // Stop browser auto nav
     event.preventDefault();
 
+    // Verify the 'secret'
     if (!verifySecret(this.state.id, this.state.secret)) {
       alert("That's not the right secret. Try again!");
     } else {
-      this.fetchBadge();
+      // Check if the badge exists
+      if ((await this.doesBadgeExist()).ok) {
+        this.setState({ shouldRedirect: true });
+      } else {
+        alert(
+          "That badge either doesn't exist or isn't connected to the network right now. Try again!"
+        );
+      }
     }
   }
 
-  fetchBadge(event) {
-    fetch(
+  doesBadgeExist() {
+    return fetch(
       `http://${config.HOST_IP_ADDRESS}:${config.API_PORT}/api/badges/by-id/${this.state.id}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       }
-    )
-      .then((res) => this.setState({ badgeExists: res.ok }))
-      .catch((err) => err);
-  }
-
-  componentDidUpdate() {
-    if (this.state.badgeExists !== null) {
-      // If we've queried the API
-      if (this.state.badgeExists) {
-        // If badge exists in DB, then move on
-        this.setState({ shouldRedirect: true });
-      } else {
-        // Badge does not exist; reset state
-        alert("That badge hasn't been registered yet. Try again!");
-        this.setState({ badgeExists: null });
-      }
-    }
+    );
   }
 
   render() {
@@ -98,7 +91,7 @@ class LoginForm extends React.Component {
               name="secret"
               type="text"
               required
-              pattern="[0-9a-f]+"
+              pattern="[0-9a-fA-F]+"
               value={this.state.secret}
               onChange={this.handleChange}
             />
