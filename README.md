@@ -36,8 +36,12 @@ Here's a diagram (click to open Miro):
 └── .gitignore
 └── README.md
 └── LICENSE
+└── config.ini
 └── package-lock.json
 └── package.json
+└── .github
+│   └── workflows
+│       └── codeql-analysis.yml
 └── api
 │   └── app.js
 │   └── bin
@@ -47,34 +51,43 @@ Here's a diagram (click to open Miro):
 │   └── package-lock.json
 │   └── package.json
 │   └── public
+│   │   └── images
+│   │       └── badge_template_blank.png
+│   │       └── badge_template_full.png
 │   │   └── stylesheets
-│   │   │   └── style.css
+│   │       └── style.css
 │   └── routes
 │   │   └── api.js
-│   │   └── index.js
-│   │   └── users.js
 │   └── views
-│   │   └── error.jade
-│   │   └── index.jade
-│   │   └── layout.jade
+│       └── error.jade
+│       └── layout.jade
 └── client
-    └── README.md
-    └── package-lock.json
-    └── package.json
-    └── public
-    │   └── favicon.ico
-    │   └── index.html
-    │   └── logo192.png
-    │   └── logo512.png
-    │   └── manifest.json
-    │   └── robots.txt
-    └── src
-        └── App.css
-        └── App.js
-        └── index.css
-        └── index.js
-        └── logo.svg
-        └── reportWebVitals.js
+   └── build
+   │   └── config.gypi
+   └── package-lock.json
+   └── package.json
+   └── public
+   │   └── favicon.ico
+   │   └── index.html
+   │   └── manifest.json
+   │   └── pch_spiral_192.png
+   │   └── pch_spiral_512.png
+   │   └── robots.txt
+   └── src
+       └── css
+       │   └── index.scss
+       └── fonts
+       │   └── BetterTimes.woff
+       │   └── Cosmos-Light.otf
+       │   └── Cosmos-Light.woff
+       │   └── Cosmos-Medium.otf
+       │   └── Cosmos-Medium.woff
+       │   └── fonts.scss
+       └── index.jsx
+       └── routes
+           └── Login.jsx
+           └── editor.jsx
+           └── error.jsx
 ```
 
 ## API reference
