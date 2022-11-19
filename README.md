@@ -9,7 +9,8 @@ Here's a diagram (click to open Miro):
 
 ## Requirements
 - a local [MongoDB server](https://www.mongodb.com/docs/manual/installation/)
-- a DHCP server on the subnet
+- a DHCP server on the subnet (I'm using [dhcpsrv](https://www.dhcpserver.de/cms/) for Windows because it's easy to use; check my config files [here](./configs/dhcpsrv/))
+- e-paper digital name badges with wireless LAN capability. I used Waveshare's Pico-ePaper-2.9 and Pico-ePaper-2.9-B, and you can find the drivers and code for using those [here](https://github.com/mhmatthall/badgeboy-picow).
 - a meaty wireless access point
   - I'm using a UniFi Lite 6
   - if you're running this in a private LAN, make sure to disable any upstream connection monitoring; UniFi APs have this enabled by default and it took me a week to figure out how to turn it off :(
@@ -28,7 +29,6 @@ Here's a diagram (click to open Miro):
         "buffer": require.resolve("buffer/"),
       },
   ```
-- e-paper digital name badges with wireless LAN capability. I used Waveshare's Pico-ePaper-2.9 and Pico-ePaper-2.9-B, and you can find the drivers and code for using those [here](https://github.com/mhmatthall/badgeboy-picow).
 
 ## Repo structure
 ```
