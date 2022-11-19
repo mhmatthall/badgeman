@@ -136,6 +136,12 @@ Here's a diagram (click to open Miro):
 ## Future plans
 I intend to occasionally improve this and eventually turn it into an easy all-in-one solution for digital name badges for conferences.
 
+Definitely adding:
+- Faster display updates (currently takes two minutes, I don't know why)
+- Containerisation
+- Standard image conversion to B/W and display
+- A dashboard to view all connected badges
+
 Ideas include:
 - Customisable badge graphic designs
 - Multiple badge display colours
