@@ -1,20 +1,36 @@
 # badgeman
-A standalone digital name badge management server designed for use in large special events. Originally created for the Festival of Ideas 2022 at Swansea University.
+A standalone, offline digital name badge management server designed for use in large special events.
+
+**NOTE: This project is extremely WIP and so expect frequent breaking changes! A release will be made when things are a bit more settled.**
 
 ## Architecture
 This version of the app is designed to be run entirely locally on a private subnet. It incorporates a web server for the front-end badge editor web app and a REST back-end API server for data access for the UI/badges.
 
-Here's a diagram (click to open Miro):
-[![Digibadge_architecture170922](https://user-images.githubusercontent.com/42594962/190867248-da39a1ed-51c1-450b-aa64-2f69235e85e9.jpg)](https://miro.com/app/board/uXjVPdtm_zU=/?share_link_id=651121183805)
+Here's a diagram (click to open in Miro):
+[![badgeman_arch_feb23](https://user-images.githubusercontent.com/42594962/218265791-4993ea90-c131-4be2-8d81-616e6238a19f.jpg)](https://miro.com/app/board/uXjVPdtm_zU=/?share_link_id=651121183805)
 
-## Requirements
-- a local [MongoDB server](https://www.mongodb.com/docs/manual/installation/)
-- a DHCP server on the subnet (I'm using [dhcpsrv](https://www.dhcpserver.de/cms/) for Windows because it's easy to use; check my config files [here](./configs/dhcpsrv/))
-- e-paper digital name badges with wireless LAN capability. I used Waveshare's Pico-ePaper-2.9 and Pico-ePaper-2.9-B, and you can find the drivers and code for using those [here](https://github.com/mhmatthall/badgeboy-picow).
-- a meaty wireless access point
+## Prerequisites
+### For the WLAN:
+- a meaty wireless access point that can handle your client numbers
   - I'm using a UniFi Lite 6
-  - if you're running this in a private LAN, make sure to disable any upstream connection monitoring; UniFi APs have this enabled by default and it took me a week to figure out how to turn it off :(
-- once installed, a modification to `./client/node_modules/react-scripts/config/webpack.config.js` at the `resolve` tag to fix node polyfill issues, like this:
+  - Make sure to disable any upstream connection monitoring; UniFi APs have this enabled by default and it took me a week to figure out how to turn it off :(
+
+### For the host server:
+- a local [MongoDB server](https://www.mongodb.com/docs/manual/installation/)
+- a DHCP server
+  - I'm using [dhcpsrv](https://www.dhcpserver.de/cms/) for Windows right now because it's easy; [I've included config files for this](./configs/dhcpsrv/)
+  - This **will** change when this project is containerised
+
+### For the badges:
+- a WiFi-enabled microcontroller to communicate with the network and control the display
+  - I'm using Raspberry Pi Pico W flashed with MicroPython binaries; [my controller code here](https://github.com/mhmatthall/badgeboy-picow)
+- e-paper digital name badges
+  - I'm using Waveshare Pico-ePaper-2.9 and Pico-ePaper-2.9-B because they were the ones in stock and within budget; [my drivers for these here](https://github.com/mhmatthall/badgeboy-picow)
+
+## Installation
+- clone the repo
+- run `npm install`
+- once complete, we need to patch some JS polyfill issues -- edit `./client/node_modules/react-scripts/config/webpack.config.js` at the `resolve` tag, like this:
   ```
     resolve: {
       fallback: {
@@ -31,58 +47,28 @@ Here's a diagram (click to open Miro):
   ```
 
 ## Repo structure
+Simplified to illustrate where the core files are. The Express back-end lives at `./api` and the React front-end at `./client`.
 ```
 .
-└── .gitignore
-└── README.md
-└── LICENSE
 └── config.ini
-└── package-lock.json
 └── package.json
-└── .github
-│   └── workflows
-│       └── codeql-analysis.yml
 └── api
 │   └── app.js
-│   └── bin
-│   │   └── www
-│   └── models
-│   │   └── Badge.js
-│   └── package-lock.json
 │   └── package.json
+│   └── bin
+│   └── models
 │   └── public
-│   │   └── images
-│   │       └── badge_template_blank.png
-│   │       └── badge_template_full.png
-│   │   └── stylesheets
-│   │       └── style.css
 │   └── routes
 │   │   └── api.js
 │   └── views
-│       └── error.jade
-│       └── layout.jade
 └── client
-   └── build
-   │   └── config.gypi
-   └── package-lock.json
    └── package.json
+   └── build
    └── public
-   │   └── favicon.ico
    │   └── index.html
-   │   └── manifest.json
-   │   └── pch_spiral_192.png
-   │   └── pch_spiral_512.png
-   │   └── robots.txt
    └── src
        └── css
-       │   └── index.scss
        └── fonts
-       │   └── BetterTimes.woff
-       │   └── Cosmos-Light.otf
-       │   └── Cosmos-Light.woff
-       │   └── Cosmos-Medium.otf
-       │   └── Cosmos-Medium.woff
-       │   └── fonts.scss
        └── index.jsx
        └── routes
            └── Login.jsx
@@ -137,15 +123,15 @@ Here's a diagram (click to open Miro):
 I intend to occasionally improve this and eventually turn it into an easy all-in-one solution for digital name badges for conferences.
 
 Definitely adding:
-- Faster display updates (currently takes two minutes, I don't know why)
-- Containerisation
+- ~~Faster display updates (currently takes two minutes, I don't know why)~~ ([Fixed in `badgeboy` v0.2 🎉](https://github.com/mhmatthall/badgeboy-picow/commit/5ff91b1))
+- Containerisation with Docker
 - Standard image conversion to B/W and display
-- A dashboard to view all connected badges
+- A dashboard to view & manage all connected badges
 
 Ideas include:
 - Customisable badge graphic designs
 - Multiple badge display colours
-- Interactivity (games, quiz, etc.)
-- Live notifications
-- Internet connectivity
-- Automatic/easier user management
+- Live push notifications to all badges (for event notifications, lost property, etc.)
+- Interactivity through additional hardware support (e.g. adding buttons to badges for 2-way communication)
+- Internet connectivity for remote client management
+- Automatic user management
