@@ -9,43 +9,6 @@ This version of the app is designed to be run entirely locally on a private subn
 Here's a diagram (click to open in Miro):
 [![badgeman_arch_feb23](https://user-images.githubusercontent.com/42594962/218265791-4993ea90-c131-4be2-8d81-616e6238a19f.jpg)](https://miro.com/app/board/uXjVPdtm_zU=/?share_link_id=651121183805)
 
-## Prerequisites
-### For the WLAN:
-- a meaty wireless access point that can handle your client numbers
-  - I'm using a UniFi Lite 6
-  - Make sure to disable any upstream connection monitoring; UniFi APs have this enabled by default and it took me a week to figure out how to turn it off :(
-
-### For the host server:
-- a local [MongoDB server](https://www.mongodb.com/docs/manual/installation/)
-- a DHCP server
-  - I'm using [dhcpsrv](https://www.dhcpserver.de/cms/) for Windows right now because it's easy; [I've included config files for this](./configs/dhcpsrv/)
-  - This **will** change when this project is containerised
-
-### For the badges:
-- a WiFi-enabled microcontroller to communicate with the network and control the display
-  - I'm using Raspberry Pi Pico W flashed with MicroPython binaries; [my controller code here](https://github.com/mhmatthall/badgeboy-picow)
-- e-paper digital name badges
-  - I'm using Waveshare Pico-ePaper-2.9 and Pico-ePaper-2.9-B because they were the ones in stock and within budget; [my drivers for these here](https://github.com/mhmatthall/badgeboy-picow)
-
-## Installation
-- clone the repo
-- run `npm install`
-- once complete, we need to patch some JS polyfill issues -- edit `./client/node_modules/react-scripts/config/webpack.config.js` at the `resolve` tag, like this:
-  ```
-    resolve: {
-      fallback: {
-        "fs": false,
-        "http": require.resolve("stream-http"),
-        "https": false,
-        "zlib": require.resolve("browserify-zlib"),
-        "path": require.resolve("path-browserify"),
-        "stream": require.resolve("stream-browserify"),
-        "util": require.resolve("util/"),
-        "assert": require.resolve("assert/"),
-        "buffer": require.resolve("buffer/"),
-      },
-  ```
-
 ## Repo structure
 Simplified to illustrate where the core files are. The Express back-end lives at `./api` and the React front-end at `./client`.
 ```
@@ -75,6 +38,43 @@ Simplified to illustrate where the core files are. The Express back-end lives at
            └── editor.jsx
            └── error.jsx
 ```
+
+## Prerequisites
+### For the WLAN:
+- a meaty wireless access point that can handle your client numbers
+  - I'm using a UniFi Lite 6
+  - Make sure to disable any upstream connection monitoring; UniFi APs have this enabled by default and it took me a week to figure out how to turn it off :(
+
+### For the host server:
+- a local [MongoDB server](https://www.mongodb.com/docs/manual/installation/)
+- a DHCP server
+  - I'm using [dhcpsrv](https://www.dhcpserver.de/cms/) for Windows right now because it's easy; [I've included config files for this](./configs/dhcpsrv/)
+  - This **will** change when this project is containerised
+
+### For the badges:
+- a WiFi-enabled microcontroller to communicate with the network and control the display
+  - I'm using Raspberry Pi Pico W flashed with MicroPython binaries; [my controller code here](https://github.com/mhmatthall/badgeboy-picow/blob/main/src/main.py)
+- e-paper digital name badges
+  - I'm using Waveshare Pico-ePaper-2.9 and Pico-ePaper-2.9-B because they were the ones in stock and within budget; [see this repo for my drivers](https://github.com/mhmatthall/badgeboy-picow)
+
+## Installation
+- clone the repo
+- run `npm install`
+- once complete, we need to patch some JS polyfill issues -- edit `./client/node_modules/react-scripts/config/webpack.config.js` at the `resolve` tag, like this:
+  ```
+    resolve: {
+      fallback: {
+        "fs": false,
+        "http": require.resolve("stream-http"),
+        "https": false,
+        "zlib": require.resolve("browserify-zlib"),
+        "path": require.resolve("path-browserify"),
+        "stream": require.resolve("stream-browserify"),
+        "util": require.resolve("util/"),
+        "assert": require.resolve("assert/"),
+        "buffer": require.resolve("buffer/"),
+      },
+  ```
 
 ## API reference
 - `GET /badges`
@@ -119,19 +119,6 @@ Simplified to illustrate where the core files are. The Express back-end lives at
     	message: ""
     }
     ```
+
 ## Future plans
-I intend to occasionally improve this and eventually turn it into an easy all-in-one solution for digital name badges for conferences.
-
-Definitely adding:
-- ~~Faster display updates (currently takes two minutes, I don't know why)~~ ([Fixed in `badgeboy` v0.2 🎉](https://github.com/mhmatthall/badgeboy-picow/commit/5ff91b1))
-- Containerisation with Docker
-- Standard image conversion to B/W and display
-- A dashboard to view & manage all connected badges
-
-Ideas include:
-- Customisable badge graphic designs
-- Multiple badge display colours
-- Live push notifications to all badges (for event notifications, lost property, etc.)
-- Interactivity through additional hardware support (e.g. adding buttons to badges for 2-way communication)
-- Internet connectivity for remote client management
-- Automatic user management
+[Check out the 2023 roadmap thread in the discussions!](https://github.com/mhmatthall/badgeman/discussions/4)
